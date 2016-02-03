@@ -1,0 +1,250 @@
+-- regfile.vhd: Register file for the MIPS processor
+--
+-- Zhao Zhang, Fall 2013
+--
+
+--
+-- MIPS regfile, clock version for SCP
+--
+library IEEE;
+use IEEE.std_logic_1164.all;
+use IEEE.numeric_std.all;
+use work.mips32.all;
+
+entity regfile is
+  generic (DELAY : time := 9.5 ns);
+  port(src1   : in  m32_5bits;
+       src2   : in  m32_5bits;
+       dst    : in  m32_5bits;
+       wdata  : in  m32_word;
+       rdata1 : out m32_word;
+       rdata2 : out m32_word;
+       WE     : in  m32_1bit;
+       clock  : in  m32_1bit);
+end regfile;
+
+architecture behavior of regfile is
+  signal reg_array : m32_regval_array := (others => x"00000000");
+begin
+  -- Register reset/write logic, guarded by clock rising edge
+  P_WRITE : process (clock)
+    variable r : integer;
+  begin
+    -- Write/reset logic. It is guarded by clock.
+    if (rising_edge(clock)) then
+      if (WE = '1') then
+        r := to_integer(unsigned(dst));
+        if r /= 0 then         -- Don't write to $0
+          reg_array(r) <= wdata;
+        end if;
+      end if;
+    end if;
+  end process;
+  
+  -- Register read logic. It is not clocked.
+  P_READ : process (reg_array, src1, src2)
+    variable r1, r2 : integer;
+  begin
+    -- Convert src1 and src2 to integer type
+    r1 := to_integer(unsigned(src1));
+    r2 := to_integer(unsigned(src2));
+
+    -- Read r1, return fixed zero if r1 = 0
+    if r1 /= 0 then
+      rdata1 <= reg_array(r1) after DELAY;
+    else
+      rdata1 <= x"00000000" after DELAY;
+    end if;
+
+    -- Read r2, return fixed zero if r1 = 0
+    if r2 /= 0 then
+      rdata2 <= reg_array(r2) after DELAY;
+    else
+      rdata2 <= x"00000000" after DELAY;
+    end if;
+  end process;
+end behavior;
+
+--architecture structural of MIPS_register_file is 
+
+library IEEE;
+use IEEE.std_logic_1164.all;
+use IEEE.numeric_std.all;
+use work.mips32.all;
+
+entity regfile_structural is
+ generic (DELAY : time := 9.5 ns);
+  port(src1   : in  m32_5bits;
+       src2   : in  m32_5bits;
+       dst    : in  m32_5bits;
+       wdata  : in  m32_word;
+       rdata1 : out m32_word;
+       rdata2 : out m32_word;
+       WE     : in  m32_1bit;
+       clock  : in  m32_1bit);
+     end regfile_structural;
+     
+architecture structural of regfile_structural is 
+
+component decoder_5_32
+    port(i_x  : in m32_5bits;
+       o_Y   : out m32_word);
+     end component;
+
+component thirtytwo_one_mux_dataflow 
+  generic(N : integer := 32);                      
+  port(i_0  : in  m32_word;   
+       i_1  : in  m32_word;
+       i_2  : in  m32_word;
+       i_3  : in  m32_word;
+       i_4  : in  m32_word;
+       i_5  : in  m32_word;
+       i_6  : in  m32_word;
+       i_7  : in  m32_word;
+       i_8  : in  m32_word;
+       i_9  : in  m32_word;
+       i_10  : in  m32_word;
+       i_11  : in  m32_word;
+       i_12  : in  m32_word;
+       i_13  : in  m32_word;
+       i_14  : in  m32_word;
+       i_15  : in  m32_word;
+       i_16  : in  m32_word;
+       i_17  : in  m32_word;
+       i_18  : in  m32_word;
+       i_19  : in  m32_word;
+       i_20  : in  m32_word;
+       i_21  : in  m32_word;
+       i_22  : in  m32_word;
+       i_23  : in  m32_word;
+       i_24  : in  m32_word;
+       i_25  : in  m32_word;
+       i_26  : in  m32_word;
+       i_27  : in  m32_word;
+       i_28  : in  m32_word;
+       i_29  : in  m32_word;
+       i_30  : in  m32_word;
+       i_31  : in  m32_word;
+       i_S  : in  m32_5bits;                    
+       o_F  : out m32_word);  
+end component;
+
+component reg_nbit 
+  generic(N : integer := 32);
+  port(i_CLK        : in std_logic;     -- Clock input
+       i_RST        : in std_logic;     -- Reset input
+       i_WE         : in std_logic;     -- Write enable input
+       i_D          : in m32_word;     -- Data value input
+       o_Q          : out m32_word);   -- Data value output
+end component;
+
+type vector32 is array (natural range<>) of std_logic_vector(31 downto 0);
+signal register_out: vector32(31 downto 0);
+
+signal decoder_out: std_logic_vector(31 downto 0);
+
+signal and_out: std_logic_vector(31 downto 0);
+
+begin
+
+x1: decoder_5_32 port map(i_x => dst,
+                          o_y => decoder_out);
+                           
+      
+G3: for i in 0 to 31 generate
+    and_out(i) <= decoder_out(i) AND WE;
+  end generate G3;
+
+G2: for i in 1 to 31 generate
+    reg_nbit_i: reg_nbit
+    port MAP (i_CLK => clock,
+              i_RST => '1',
+              i_D =>  wdata,
+              i_WE => and_out(i),
+              o_Q => register_out(i));
+              
+    end generate G2;  
+    
+    
+reg_nbit_zero : reg_nbit
+port MAP (i_CLK => clock,
+          i_RST => '1',
+          i_D => wdata,
+          i_WE => '0',
+          o_Q => register_out(0));
+  
+
+
+x2: thirtytwo_one_mux_dataflow port map(i_0 => register_out(0),
+i_1 => register_out(1),
+i_2 => register_out(2),
+i_3 => register_out(3),
+i_4 => register_out(4),
+i_5 => register_out(5),
+i_6 => register_out(6),
+i_7 => register_out(7),
+i_8 => register_out(8),
+i_9 => register_out(9),
+i_10 => register_out(10),
+i_11 => register_out(11),
+i_12 => register_out(12),
+i_13 => register_out(13),
+i_14 => register_out(14),
+i_15 => register_out(15),
+i_16 => register_out(16),
+i_17 => register_out(17),
+i_18 => register_out(18),
+i_19 => register_out(19),
+i_20 => register_out(20),
+i_21 => register_out(21),
+i_22 => register_out(22),
+i_23 => register_out(23),
+i_24 => register_out(24),
+i_25 => register_out(25),
+i_26 => register_out(26),
+i_27 => register_out(27),
+i_28 => register_out(28),
+i_29 => register_out(29),
+i_30 => register_out(30),
+i_31 => register_out(31),
+                                        i_S => src1,
+                                        o_F => rdata1                                      
+                                        );
+
+x3: thirtytwo_one_mux_dataflow port map(i_0 => register_out(0),
+i_1 => register_out(1),
+i_2 => register_out(2),
+i_3 => register_out(3),
+i_4 => register_out(4),
+i_5 => register_out(5),
+i_6 => register_out(6),
+i_7 => register_out(7),
+i_8 => register_out(8),
+i_9 => register_out(9),
+i_10 => register_out(10),
+i_11 => register_out(11),
+i_12 => register_out(12),
+i_13 => register_out(13),
+i_14 => register_out(14),
+i_15 => register_out(15),
+i_16 => register_out(16),
+i_17 => register_out(17),
+i_18 => register_out(18),
+i_19 => register_out(19),
+i_20 => register_out(20),
+i_21 => register_out(21),
+i_22 => register_out(22),
+i_23 => register_out(23),
+i_24 => register_out(24),
+i_25 => register_out(25),
+i_26 => register_out(26),
+i_27 => register_out(27),
+i_28 => register_out(28),
+i_29 => register_out(29),
+i_30 => register_out(30),
+i_31 => register_out(31),
+                                        i_S => src2,
+                                        o_F => rdata2
+                                        );
+          
+end structural;

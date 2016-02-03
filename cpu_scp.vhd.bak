@@ -1,0 +1,433 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use work.all;
+-- This architecture of CPU must be dominantly structural, with no bahavior 
+-- modeling, and only data flow statements to copy/split/merge signals or 
+-- with a single level of basic logic gates.
+architecture scp of cpu is
+  -- The PC register
+  component PC_reg is
+    port (NPC   : in  m32_word;  	-- Next PC as input
+          PC    : out m32_word;  	-- Current PC as output
+          WE    : in  m32_1bit;   	-- Write enableenable
+          clock : in  m32_1bit);  	-- The reset signal
+  end component;
+
+  -- The main control unit
+  component control is
+    port (opcode   : in  m32_6bits;	-- The op code
+          alusrc   : out m32_2bits;	-- Source choice for the 2nd input of ALU
+          aluop    : out m32_3bits;	-- ALU op
+          memread  : out m32_1bit;	-- Memory read signal
+          memwrite : out m32_1bit;	-- Memory write signal
+          regwrite : out m32_1bit;	-- Register write
+          regdst   : out m32_1bit;	-- Register destination, rt or rd
+          memtoreg : out m32_1bit;	-- Memory data or ALU output, which to register
+          link     : out m32_1bit;	-- Write PC_plus_4 to $31?	
+          branch   : out m32_2bits;	-- Branch instruction?
+          jump     : out m32_1bit);	-- Jump instruction?
+    end component;
+  
+  -- The ALU control unit, extending aluop to 3-bit and adding jr and use_shamt signals
+  component alu_ctrl is
+    port (aluop      : in  m32_3bits;  	-- ALUOp from the main control
+          funct       : in  m32_6bits;  -- The funct field
+          alu_code    : out m32_4bits;  -- ALU operation code
+          jr          : out m32_1bit;   -- Is it JR inst?
+          use_shamt   : out m32_1bit);  -- Is it a Shift instruction that use shamt?
+  end component;
+  
+  -- The register file
+  component regfile is
+     port (src1      : in  m32_5bits;
+           src2      : in  m32_5bits;
+           dst       : in  m32_5bits;
+           wdata     : in  m32_word;
+           rdata1    : out m32_word;
+           rdata2    : out m32_word;
+           WE        : in  m32_1bit;
+           clock     : in  m32_1bit);
+  end component;
+  
+  -- The ALU
+  component ALU is
+    port (data1    : in m32_word;
+          data2    : in m32_word;
+          alu_code : in m32_4bits;
+          result   : out m32_word;
+          zero     : out m32_1bit);
+  end component;
+
+  -- The two adders for calculating PC+4 and branch target
+  component adder is
+    port (src1    : in  m32_word;
+          src2    : in  m32_word;
+          result  : out m32_word);
+  end component;
+  
+  -- 2-to-1 MUX
+  component mux2to1 is
+    generic (M    : integer := 1);    -- Number of bits in the inputs and output
+    port (input0  : in  m32_vector(M-1 downto 0) := (others => '0');
+          input1  : in  m32_vector(M-1 downto 0) := (others => '0');
+          sel     : in  m32_1bit;
+          output  : out m32_vector(M-1 downto 0));
+  end component;
+  
+  -- 4-to-1 MUX
+  component mux4to1 is
+    generic (M    : integer := 1);    -- Number of bits in the inputs and output
+    port (input0  : in  m32_vector(M-1 downto 0) := (others => '0');
+          input1  : in  m32_vector(M-1 downto 0) := (others => '0');
+          input2  : in  m32_vector(M-1 downto 0) := (others => '0');
+          input3  : in  m32_vector(M-1 downto 0) := (others => '0');
+          sel     : in  m32_2bits;
+          output  : out m32_vector(M-1 downto 0));
+  end component;
+
+  -- A special MUX for next PC selection
+  component pc_mux is
+    port (PC_plus_4 : in  m32_word;	-- PC plus 4
+          br_target : in  m32_word;	-- Branch target
+          j_target  : in  m32_word;	-- Jump target
+	      jr_target : in  m32_word;	-- jr target
+          branch    : in  m32_2bits;	-- Is it a branch?
+          jump      : in  m32_1bit;	-- Is it a jump?
+	      jr        : in  m32_1bit;	-- Is it a jr?
+          ALU_zero  : in  m32_1bit;	-- ALU result is zero?
+          NPC       : out m32_word);	-- Next PC
+  end component;
+
+  --
+  -- Signals in the CPU
+  --
+  
+  -- PC-related signals
+  signal PC         : m32_word;		-- PC for the current inst
+  signal NPC        : m32_word;		-- PC for the next inst, started with 0x00080000
+  signal PC_plus_4  : m32_word;		-- Next PC sequentially
+  signal br_target  : m32_word;		-- The target PC for branch
+  signal j_target   : m32_word;		-- The jump target
+
+
+  -- Instruction fields and derives
+  signal opcode     : m32_6bits;	-- 6-bit opcode
+  -- MORE SIGNALS
+  signal imme       : m32_halfword; -- 16-bit immediate
+  signal rs         : m32_5bits;
+  signal rt         : m32_5bits;
+  signal rd         : m32_5bits;
+  signal shamt      : m32_5bits;
+  signal funct      : m32_6bits;
+
+  signal j_address  : m32_26bits;
+  signal j_offset   : m32_26bits;
+  signal ext_imme   : m32_word;
+  signal ext_shamt  : m32_word;
+  signal br_offset  : m32_word;
+  signal ext_imme_shft : m32_word; -- this signal is for lui
+  
+  -- Control signals
+  signal aluop      : m32_3bits;	-- ALU Op (extended to 3-bit)
+  -- MORE SIGNALS
+  signal alusrc     : m32_2bits;
+  signal regdst     : m32_1bit; -- Reg Destination
+  signal jump       : m32_1bit; -- Jump mux selector
+  signal branch     : m32_2bits; -- Branch mux selector
+  signal memread    : m32_1bit;
+  signal memwrite   : m32_1bit;
+  signal regwrite   : m32_1bit;
+  signal memtoreg   : m32_1bit;
+  signal link       : m32_1bit;
+  
+
+  -- Control signals from ALU Ctrl
+  signal jr	    : m32_1bit;		-- Is it JR?
+  signal use_shamt  : m32_1bit;		-- Is it a shift instruction using shamt?
+  signal alu_code   : m32_4bits;
+
+  -- Signals connected to the data ports of the regfile
+  signal rdata1     : m32_word;		-- Register read data 1
+  -- MORE SIGNALS
+  signal rdata2     : m32_word;
+  signal wdata      : m32_word;
+  
+  -- Signals connected to the ALU
+  signal alu_input1 : m32_word;		-- The first input of ALU
+  -- MORE SIGNALS
+  signal alu_input2 : m32_word;
+  signal alu_result : m32_word;
+  signal alu_zero   : std_logic;
+  
+  -- Other signals
+  signal dst        : m32_5bits;	-- The output from the mux for Write Register
+  -- MORE SIGNALS
+  --signal branch_target  : m32_word;
+  signal branch_result  : m32_word;
+  signal branch_mux_selector : m32_1bit;
+  signal jal_dst : m32_5bits;
+  signal wdata_dmem : m32_word;
+
+  --for Reg_file : regfile use entity work.regfile(structural);
+  --for Adder_plus4 : adder use entity work.adder(structural);  
+
+begin
+  --------------------------------------------
+  -- STAGE 1 Instruction Fetch.
+  -- For PC: Calculate PC+4 
+  --------------------------------------------
+
+  -- Program counter as a register
+  PC1 : PC_reg
+    port map (
+      NPC   => NPC, 
+      PC    => PC,
+      WE    => '1',	-- Update every clock
+      clock => clock);
+
+  -- MORE CODE 
+  --Calculate PC+4
+  Adder_plus4 : adder
+    port map (
+      src1 => PC,
+      src2 => x"00000004",
+      result => PC_plus_4
+    );
+
+  -- Debugging: Convert instruction from binary to text
+  inst_text <= mips2text(inst);
+
+  --------------------------------------------------------------------------------
+  -- STAGE 2 Decode and register read. Note: Register write is also located here,
+  -- but it happens in STAGE 5.
+  -- For PC: Form the jump target
+  --------------------------------------------------------------------------------
+  
+  -- Split the instructions into fields
+  SPLIT : block
+  begin
+    opcode   <= inst(31 downto 26);
+    rs       <= inst(25 downto 21);
+    -- MORE CODE
+    rt       <= inst(20 downto 16);
+    rd       <= inst(15 downto 11);
+    shamt    <= inst(10 downto 6);
+    funct    <= inst(5 downto 0);
+    imme     <= inst(15 downto 0);
+    j_address <= inst(25 downto 0);
+  end block;
+
+  -- The derives from the instruction
+  ext_imme   <= (31 downto 16 => imme(15)) & imme;	-- Sign extension of immediate
+  ext_imme_shft <= imme & x"0000"; -- get the 16 bit immediate and just concatinate
+  -- MORE CODE
+  j_target   <= PC(31 downto 28) & j_address & "00";
+  ext_shamt  <= (31 downto 5 => shamt(4)) & shamt; --sign extension of shamt
+  
+
+  -- Control Unit, decode the op-code
+  -- CODE DELETED
+  Maincontrol : control
+    port map (
+      opcode    => opcode,
+      alusrc    => alusrc,
+      aluop     => aluop,
+      memread   => memread,
+      memwrite  => memwrite,
+      regwrite  => regwrite,
+      regdst    => regdst,
+      memtoreg  => memtoreg,
+      link      => link,
+      branch    => branch,
+      jump      => jump
+    );
+
+  -- ALU Control unit, decode the funct code
+  -- CODE DELETED
+  ALUcontrol : alu_ctrl
+    port map (
+      aluop     => aluop,
+      funct     => funct,
+      alu_code  => alu_code,
+      jr        => jr,
+      use_shamt => use_shamt
+    );
+
+  -- The register file
+  -- CODE DELETED
+  Reg_mux : mux2to1
+    generic map (M => 5)
+    port map (
+      input0 => rt,
+      input1 => rd,
+      sel    => regdst,
+      output => jal_dst
+    );
+  
+  Reg_file : regfile
+    port map (
+      src1    => rs,  
+      src2    => rt,
+      dst     => dst,
+      wdata   => wdata,
+      rdata1  => rdata1,
+      rdata2  => rdata2,
+      WE      => regwrite,
+      clock   => clock
+    );
+
+  --------------------------------------------------------------
+  -- STAGE 3 ALU execute
+  -- For PC: Calculate branch target and form jump target
+  --------------------------------------------------------------
+
+  -- ALU_SRC max for the 1st ALU input, selecting rdata1 or extended shamt
+  -- CODE DELETED
+  ALU_mux1 : mux2to1
+    generic map (M => 32)
+    port map (
+      input0 => rdata1,
+      input1 => ext_shamt,
+      sel    => use_shamt,
+      output => alu_input1
+      
+    );
+  
+  -- ALU_SRC mux for the 2nd ALU input
+  -- CODE DELETED
+  ALU_mux2 : mux4to1
+    generic map (M => 32)
+    port map (
+      input0 => rdata2,
+      input1 => ext_imme,
+      input2 => ext_imme_shft,
+      input3 => x"00000000",
+      sel    => alusrc,
+      output => alu_input2
+    );
+
+  -- The ALU
+  -- CODE DELETED
+  ALU1 : ALU
+    port map (
+      data1       => alu_input1,
+      data2       => alu_input2,
+      alu_code    => alu_code,
+      result      => alu_result,
+      zero        => alu_zero
+   );  
+
+  -- The shifter connected to the branch target adder
+  br_offset <= ext_imme (29 downto 0) & "00";
+
+  -- The branch targer adder
+  -- CODE DELETED
+  branch_adder : adder
+    port map (
+      src1    => PC_plus_4,
+      src2    => br_offset,
+      result  => br_target
+   );
+
+  ------------------------------------------------------------------------
+  -- STAGE 4 Data memory access
+  -- For PC: Decide the next PC, is it PC_plus_4, br_target, or j_target?
+  ------------------------------------------------------------------------
+
+  -- Connect alu_result and rdata2 to memory address and data inputs
+  -- CODE DELETED
+  dmem_addr   <= alu_result;
+  dmem_wdata  <= rdata2;
+
+  -- The MUX choosing the sequentially next PC and the branch target
+  -- CODE DELETED
+  
+  PCMux : pc_mux
+    port map (
+      PC_plus_4 => PC_plus_4,
+      br_target => br_target,
+      j_target => j_target,
+      jr_target => rdata1,
+      branch => branch,
+      jump => jump, 
+      jr => jr,
+      ALU_zero => ALU_zero,
+      NPC => NPC
+    );
+  
+  --BranchMux : mux2to1
+    --generic map (M => 32)
+    --port map (
+      --input0 => branch_target,
+      --input1 => PC_plus_4,
+      --sel    => alu_zero,
+      --output => branch_result
+    --);
+  
+  --PCMux : mux2to1
+    --generic map (M => 32)
+    --port map (
+      --input0 => j_target,
+      --input1 => branch_result,
+      --sel    => jump,
+      --output => NPC
+    --);
+
+  --------------------------------------------------------------
+  -- STAGE 5 Write back to register file
+  --------------------------------------------------------------
+
+  -- CODE DELETED
+
+  dmem_write <= memwrite;
+
+  imem_addr <= PC;
+
+  -- CODE DELETED
+  DmemMux : mux2to1
+    generic map (M => 32)
+    port map (
+      input1 => dmem_rdata,
+      input0 => alu_result,
+      sel => memtoreg,
+      output => wdata_dmem
+    );
+    
+  JalDataMux : mux2to1
+    generic map (M => 32)
+    port map (
+      input0 => wdata_dmem,
+      input1 => pc_plus_4,
+      sel => link,
+      output => wdata
+    );
+    
+  JalMux : mux2to1
+    generic map (M => 5)
+    port map (
+      input0 => jal_dst,
+      input1 => "11111",
+      sel => link,
+      output => dst
+    );
+  
+
+  -- Copy register write info for debuging
+  reg_write  <= regwrite;
+  reg_dst    <= dst;
+  reg_wdata  <= wdata;
+  imem_addr  <= pc; 
+  dmem_addr  <= alu_result;
+  dmem_read  <= memread;
+  dmem_write <= memwrite;
+  --dmem_wmask <= 
+  dmem_wdata <= rdata2;
+  dmem_wmask <= ( 3=>memwrite,
+                  2=>memwrite,
+                  1=>memwrite,
+                  0=>memwrite);
+
+end SCP;
+

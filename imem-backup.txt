@@ -1,0 +1,126 @@
+DEPTH=1024; 	% Memory depth and width are required 
+		% DEPTH is the number of addresses 
+WIDTH = 32; 	% WIDTH is the number of bits of data per word
+		% DEPTH and WIDTH should be entered as decimal numbers
+
+ADDRESS_RADIX = DEC; 	% Address and value radixes are required
+DATA_RADIX = BIN; 	% Enter BIN, DEC, HEX, OCT, or UNS; unless
+			% otherwise specified, radixes = HEX
+
+-- Specify values for addresses, which can be single address or range
+-- SOME THINGS TO CONSIDER
+-- 1) This memory is word-addressable, versus the MIPS conceptual byte-addressable memory.
+--    This means that address 1 corresponds to word 1, address 2 corresponds to word 2, etc.
+--    Since MIPS will be generating byte addresses, you will have to create some (very simple)
+--    logic in your VHDL wrapper to deal with byte/word offsets. 
+-- 2) The "single address" notation seems to be least likely to cause confusion so that is what
+--    I recommend. 
+-- 3) The values need to be in 32-bit hex form (i.e. don't use F when you really mean 0000000F).
+
+--0--main:     lui $a0, 0x1001	     # data array from address 0x10010000
+--1--	     ori $a0, 0              # 
+--2--	     lui $a1, 0              # array size is 10
+--3--	     ori $a1, 10	     # 
+--4--	     jal sort
+--5--loop:     j loop		     # idle loop
+--6--	     nop	 
+--7--          nop
+--8--sort:     addi $sp, $sp, -20      # make room on stack for 5 registers (20 bytes)
+--9--          sw $ra, 16($sp)         # save $ra on stack
+--10--         sw $s3,12($sp)          # save $s3 on stack
+--11--         sw $s2, 8($sp)          # save $s2 on stack
+--12--         sw $s1, 4($sp)          # save $s1 on stack
+--13--         sw $s0, 0($sp)          # save $s0 on stack
+--14--         add $s2, $a0, $zero     # save $a0 into $s2
+--15--         add $s3, $a1, $zero     # save $a1 into $s3
+--16           add $s0, $zero, $zero   # i = 0
+--17--for1tst: slt  $t0, $s0, $s3      # $t0 = 0 if $s0 ? $s3 (i ? n)
+--18--         beq  $t0, $zero, exit1  # go to exit1 if $s0 ? $s3 (i ? n)
+--19--         addi $s1, $s0, -1   	   # j = i - 1
+--20--for2tst: slti $t0, $s1, 0        # $t0 = 1 if $s1 < 0 (j < 0)
+--21--         bne  $t0, $zero, exit2  # go to exit2 if $s1 < 0 (j < 0)
+--22--         sll  $t1, $s1, 2        # $t1 = j * 4
+--23--         add  $t2, $s2, $t1      # $t2 = v + (j * 4)
+--24--         lw   $t3, 0($t2)        # $t3 = v[j]
+--25--         lw   $t4, 4($t2)        # $t4 = v[j + 1]
+--26--         slt  $t0, $t4, $t3      # $t0 = 0 if $t4 ? $t3
+--27--         beq  $t0, $zero, exit2  # go to exit2 if $t4 ? $t3
+--28--         add $a0, $s2, $zero     # 1st param of swap is v (old $a0)
+--29--         add $a1, $s1, $zero     # 2nd param of swap is j
+--30--         jal  swap               # call swap procedure
+--31--         addi $s1, $s1, -1       # j -= 1
+--32--         j    for2tst            # jump to test of inner loop
+--33--exit2:   addi $s0, $s0, 1        # i += 1
+--34--         j    for1tst            # jump to test of outer loop
+--35--exit1:   lw $s0, 0($sp)          # restore $s0 from stack
+--36--         lw $s1, 4($sp)          # restore $s1 from stack
+--37--         lw $s2, 8($sp)          # restore $s2 from stack
+--38--         lw $s3,12($sp)          # restore $s3 from stack
+--39--         lw $ra,16($sp)          # restore $ra from stack
+--40--         addi $sp,$sp, 20        # restore stack pointer
+--41--         jr $ra                 
+--42--swap:    sll $t1, $a1, 2         # $t1 = k * 4
+--43--         add $t1, $a0, $t1       # $t1 = v+(k*4) ; (address of v[k])
+--44--         lw $t0, 0($t1)          # $t0 (temp) = v[k]
+--45--         lw $t2, 4($t1)          # $t2 = v[k+1]
+--46--         sw $t2, 0($t1)          # v[k] = $t2 (v[k+1])
+--47--         sw $t0, 4($t1)          # v[k+1] = $t0 (temp)
+--48--         jr $ra                  # return to calling routine
+
+CONTENT
+BEGIN
+-- Instruction formats
+--R ======-----=====-----=====------
+--I ======-----=====----------------
+--J ======--------------------------
+0  : 00111100000001000001000000000001;
+1  : 00110100000001000000000000000000;
+2  : 00111100000001010000000000000000;
+3  : 00110100000001010000000000001010;
+4  : 00001100000000000000000000001000;
+5  : 00001000000000000000000000000101;
+6  : 00000000000000000000000000100000;
+7  : 00000000000000000000000000100000;
+8  : 00100011101111011111111111101100;
+9  : 10101111101111110000000000010000;
+10 : 10101111101100110000000000001100;
+11 : 10101111101100100000000000001000;
+12 : 10101111101100010000000000000100;
+13 : 10101111101100000000000000000000;
+14 : 00000000100000001001000000100000;
+15 : 00000000101000001001100000100000;
+16 : 00000000000000001000000000100000;
+17 : 00000010000100110100000000101010;
+18 : 00010001000000000000000000010000;
+19 : 00100010000100011111111111111111;
+20 : 00101010001010000000000000000000;
+21 : 00010101000000000000000000001011;
+22 : 00000000000100010100100010000000;
+23 : 00000010010010010101000000100000;
+24 : 10001101010010110000000000000000;
+25 : 10001101010011000000000000000100;
+26 : 00000001100010110100000000101010;
+27 : 00010001000000000000000000000101;
+28 : 00000010010000000010000000100000;
+29 : 00000010001000000010100000100000;
+30 : 00001100000000000000000000101010;
+31 : 00100010001100011111111111111111;
+32 : 00001000000000000000000000010100;
+33 : 00100010000100000000000000000001;
+34 : 00001000000000000000000000010001;
+35 : 10001111101100000000000000000000;
+36 : 10001111101100010000000000000100;
+37 : 10001111101100100000000000001000;
+38 : 10001111101100110000000000001100;
+39 : 10001111101111110000000000010000;
+40 : 00100011101111010000000000010100;
+41 : 00000011111000000000000000001000;
+42 : 00000000000001010100100010000000;
+43 : 00000000100010010100100000100000;
+44 : 10001101001010000000000000000000;
+45 : 10001101001010100000000000000100;
+46 : 10101101001010100000000000000000;
+47 : 10101101001010000000000000000100;
+48 : 00000011000000000000000000001000;
+[49..255] : 00000000000000000000000000000000; 
+END;

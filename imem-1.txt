@@ -1,0 +1,72 @@
+DEPTH=1024; 	% Memory depth and width are required 
+		% DEPTH is the number of addresses 
+WIDTH = 32; 	% WIDTH is the number of bits of data per word
+		% DEPTH and WIDTH should be entered as decimal numbers
+
+ADDRESS_RADIX = DEC; 	% Address and value radixes are required
+DATA_RADIX = BIN; 	% Enter BIN, DEC, HEX, OCT, or UNS; unless
+			% otherwise specified, radixes = HEX
+
+-- Specify values for addresses, which can be single address or range
+-- SOME THINGS TO CONSIDER
+-- 1) This memory is word-addressable, versus the MIPS conceptual byte-addressable memory.
+--    This means that address 1 corresponds to word 1, address 2 corresponds to word 2, etc.
+--    Since MIPS will be generating byte addresses, you will have to create some (very simple)
+--    logic in your VHDL wrapper to deal with byte/word offsets. 
+-- 2) The "single address" notation seems to be least likely to cause confusion so that is what
+--    I recommend. 
+-- 3) The values need to be in 32-bit hex form (i.e. don't use F when you really mean 0000000F).
+
+0--main:  addi $a0, $zero, 0x0010
+1--       addi $a1, $zero, 0x0020
+2--       addi $a2, $zero, 0x0004
+3--       addi $a3, $zero, 0x0008
+4--       sll  $t0, $a0,   2
+5--       add  $t1, $a0,   $a1
+6--       lw   $t2, 8($a2)
+7--       sw   $t3, 4($a3)
+8--       sll  $t4, $a0,   2
+9--       add  $t5, $a0,   $a1
+10--      lw   $t6, 8($a2)
+11--      sw   $t7, 4($a3)
+12--      sll  $t8, $a0,   2
+13--      add  $t9, $a0,   $a1
+14--      sll  $s0, $a0,   2
+15--      add  $s1, $a0,   $a1
+16--      lw   $s2, 8($a2)
+17--      sw   $s3, 4($a3)
+18--      sll  $s4, $a0,   2
+19--      add  $s5, $a0,   $a1
+20--      lw   $s6, 8($a2)
+21--      sw   $s7, 4($a3)
+
+CONTENT
+BEGIN
+-- Instruction formats
+--R ======-----=====-----=====------
+--I ======-----=====----------------
+--J ======--------------------------
+0  : 00100000000001000000000000010000;
+1  : 00100000000001010000000000100000;
+2  : 00100000000001100000000000000100;
+3  : 00100000000001110000000000001000;
+4  : 00000000000001000100000010000000;
+5  : 00000000100001010100100000100000;
+6  : 10001100110010100000000000001000;
+7  : 10101100111010110000000000000100;
+8  : 00000000000001000110000010000000;
+9  : 00000000100001010110100000100000;
+10 : 10001100110011100000000000001000;
+11 : 10101100111011110000000000000100;
+12 : 00000000000001001100000010000000;
+13 : 00000000100001011100100000100000;
+14 : 00000000000001001000000010000000;
+15 : 00000010001001010100100000100000;
+16 : 10001110010010100000000000001000;
+17 : 10101110011010110000000000000100;
+18 : 00000000000001001000100010000000;
+19 : 00000010010001010110100000100000;
+20 : 10001110110011100000000000001000;
+21 : 10101110111011110000000000000100;
+[22..255] : 00000000000000000000000000000000;
+END;

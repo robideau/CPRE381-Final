@@ -1,0 +1,273 @@
+/home/robideau/cpre381/Project-A-Part1/control.vhd {1 {vcom -work work -2002 -explicit -vopt /home/robideau/cpre381/Project-A-Part1/control.vhd
+Model Technology ModelSim SE-64 vcom 6.5c Compiler 2009.08 Aug 27 2009
+-- Loading package standard
+-- Loading package std_logic_1164
+-- Loading package numeric_std
+-- Loading package mips32
+-- Compiling entity control
+-- Compiling architecture rom of control
+
+} {} {}} /home/robideau/cpre381/Project-A-Part1/alu.vhd {1 {vcom -work work -2002 -explicit -vopt /home/robideau/cpre381/Project-A-Part1/alu.vhd
+Model Technology ModelSim SE-64 vcom 6.5c Compiler 2009.08 Aug 27 2009
+-- Loading package standard
+-- Loading package std_logic_1164
+-- Loading package numeric_std
+-- Loading package mips32
+-- Compiling entity alu
+-- Compiling architecture behavior of alu
+
+} {} {}} /home/robideau/cpre381/Project-B/mips32.vhd {1 {vcom -work work -2002 -explicit -vopt /home/robideau/cpre381/Project-B/mips32.vhd
+Model Technology ModelSim SE-64 vcom 6.5c Compiler 2009.08 Aug 27 2009
+-- Loading package standard
+-- Loading package std_logic_1164
+-- Compiling package mips32
+-- Compiling package body mips32
+-- Loading package mips32
+-- Loading package textio
+-- Loading package std_logic_textio
+-- Loading package numeric_std
+
+} {} {}} /home/robideau/cpre381/Project-A-Part1/xor2.vhd {1 {vcom -work work -2002 -explicit -vopt /home/robideau/cpre381/Project-A-Part1/xor2.vhd
+Model Technology ModelSim SE-64 vcom 6.5c Compiler 2009.08 Aug 27 2009
+-- Loading package standard
+-- Loading package std_logic_1164
+-- Compiling entity xor2
+-- Compiling architecture dataflow of xor2
+
+} {} {}} /home/robideau/cpre381/Project-A-Part1/or2.vhd {1 {vcom -work work -2002 -explicit -vopt /home/robideau/cpre381/Project-A-Part1/or2.vhd
+Model Technology ModelSim SE-64 vcom 6.5c Compiler 2009.08 Aug 27 2009
+-- Loading package standard
+-- Loading package std_logic_1164
+-- Compiling entity or2
+-- Compiling architecture dataflow of or2
+
+} {} {}} /home/robideau/cpre381/Project-A-Part1/MIPS_register_file.vhd {1 {vcom -work work -2002 -explicit -vopt /home/robideau/cpre381/Project-A-Part1/MIPS_register_file.vhd
+Model Technology ModelSim SE-64 vcom 6.5c Compiler 2009.08 Aug 27 2009
+-- Loading package standard
+-- Loading package std_logic_1164
+-- Compiling entity mips_register_file
+-- Compiling architecture structure of mips_register_file
+
+} {} {}} /home/robideau/cpre381/Project-A-Part1/small_elements.vhd {1 {vcom -work work -2002 -explicit -vopt /home/robideau/cpre381/Project-A-Part1/small_elements.vhd
+Model Technology ModelSim SE-64 vcom 6.5c Compiler 2009.08 Aug 27 2009
+-- Loading package standard
+-- Loading package std_logic_1164
+-- Loading package mips32
+-- Compiling entity reg
+-- Compiling architecture behavior of reg
+-- Compiling entity pc_reg
+-- Compiling architecture behavior of pc_reg
+-- Compiling entity mux2to1
+-- Compiling architecture dataflow of mux2to1
+-- Compiling entity mux4to1
+-- Compiling architecture dataflow of mux4to1
+-- Compiling entity lud
+-- Compiling architecture behavior of lud
+-- Compiling entity fwd
+-- Compiling architecture behavior of fwd
+-- Compiling entity bru
+-- Compiling architecture behavior of bru
+-- Compiling entity pc_mux
+-- Compiling architecture behavior of pc_mux
+
+} {} {}} /home/robideau/cpre381/Lab-03/dff.vhd {1 {vcom -work work -2002 -explicit -vopt /home/robideau/cpre381/Lab-03/dff.vhd
+Model Technology ModelSim SE-64 vcom 6.5c Compiler 2009.08 Aug 27 2009
+-- Loading package standard
+-- Loading package std_logic_1164
+-- Compiling entity dff
+-- Compiling architecture mixed of dff
+
+} {} {}} /home/robideau/cpre381/Project-A-Part1/and2.vhd {1 {vcom -work work -2002 -explicit -vopt /home/robideau/cpre381/Project-A-Part1/and2.vhd
+Model Technology ModelSim SE-64 vcom 6.5c Compiler 2009.08 Aug 27 2009
+-- Loading package standard
+-- Loading package std_logic_1164
+-- Compiling entity and2
+-- Compiling architecture dataflow of and2
+
+} {} {}} /home/robideau/cpre381/Project-A-Part1/alu_ctrl.vhd {1 {vcom -work work -2002 -explicit -vopt /home/robideau/cpre381/Project-A-Part1/alu_ctrl.vhd
+Model Technology ModelSim SE-64 vcom 6.5c Compiler 2009.08 Aug 27 2009
+-- Loading package standard
+-- Loading package std_logic_1164
+-- Loading package numeric_std
+-- Loading package mips32
+-- Compiling entity alu_ctrl
+-- Compiling architecture behavior of alu_ctrl
+
+} {} {}} /home/robideau/cpre381/Project-A-Part1/32_1_mux.vhd {1 {vcom -work work -2002 -explicit -vopt /home/robideau/cpre381/Project-A-Part1/32_1_mux.vhd
+Model Technology ModelSim SE-64 vcom 6.5c Compiler 2009.08 Aug 27 2009
+-- Loading package standard
+-- Loading package std_logic_1164
+-- Compiling entity thirtytwo_one_mux_dataflow
+-- Compiling architecture structure of thirtytwo_one_mux_dataflow
+
+} {} {}} /home/robideau/cpre381/Project-A-Part1/regfile.vhd {1 {vcom -work work -2002 -explicit -vopt /home/robideau/cpre381/Project-A-Part1/regfile.vhd
+Model Technology ModelSim SE-64 vcom 6.5c Compiler 2009.08 Aug 27 2009
+-- Loading package standard
+-- Loading package std_logic_1164
+-- Loading package numeric_std
+-- Loading package mips32
+-- Compiling entity regfile
+-- Compiling architecture behavior of regfile
+-- Compiling entity regfile_structural
+-- Compiling architecture structural of regfile_structural
+
+} {} {}} /home/robideau/cpre381/Project-A-Part1/mips32.vhd {1 {vcom -work work -2002 -explicit -vopt /home/robideau/cpre381/Project-A-Part1/mips32.vhd
+Model Technology ModelSim SE-64 vcom 6.5c Compiler 2009.08 Aug 27 2009
+-- Loading package standard
+-- Loading package std_logic_1164
+-- Compiling package mips32
+-- Compiling package body mips32
+-- Loading package mips32
+-- Loading package textio
+-- Loading package std_logic_textio
+-- Loading package numeric_std
+
+} {} {}} /home/robideau/cpre381/Project-B/cpu_pl.vhd {1 {vcom -work work -2002 -explicit -vopt /home/robideau/cpre381/Project-B/cpu_pl.vhd
+Model Technology ModelSim SE-64 vcom 6.5c Compiler 2009.08 Aug 27 2009
+-- Loading package standard
+-- Loading package std_logic_1164
+-- Loading package mips32
+-- Loading package pl_reg
+-- Compiling architecture pipeline of cpu
+-- Loading entity cpu
+
+} {} {}} /home/robideau/cpre381/Project-A-Part1/register-nbit.vhd {1 {vcom -work work -2002 -explicit -vopt /home/robideau/cpre381/Project-A-Part1/register-nbit.vhd
+Model Technology ModelSim SE-64 vcom 6.5c Compiler 2009.08 Aug 27 2009
+-- Loading package standard
+-- Loading package std_logic_1164
+-- Compiling entity reg_nbit
+-- Compiling architecture mixed of reg_nbit
+
+} {} {}} /home/robideau/cpre381/Project-A-Part1/mem.vhd {1 {vcom -work work -2002 -explicit -vopt /home/robideau/cpre381/Project-A-Part1/mem.vhd
+Model Technology ModelSim SE-64 vcom 6.5c Compiler 2009.08 Aug 27 2009
+-- Loading package standard
+-- Loading package std_logic_1164
+-- Loading package std_logic_arith
+-- Loading package std_logic_unsigned
+-- Loading package textio
+-- Compiling entity mem
+-- Compiling architecture behavioral of mem
+
+} {} {}} /home/robideau/cpre381/Project-A-Part1/cpu_behavior.vhd {1 {vcom -work work -2002 -explicit -vopt /home/robideau/cpre381/Project-A-Part1/cpu_behavior.vhd
+Model Technology ModelSim SE-64 vcom 6.5c Compiler 2009.08 Aug 27 2009
+-- Loading package standard
+-- Loading package std_logic_1164
+-- Loading package numeric_std
+-- Loading package mips32
+-- Compiling architecture behavioral of cpu
+-- Loading package pl_reg
+-- Loading entity cpu
+
+} {} {}} /home/robideau/cpre381/Project-A-Part1/adder.vhd {1 {vcom -work work -2002 -explicit -vopt /home/robideau/cpre381/Project-A-Part1/adder.vhd
+Model Technology ModelSim SE-64 vcom 6.5c Compiler 2009.08 Aug 27 2009
+-- Loading package standard
+-- Loading package std_logic_1164
+-- Loading package numeric_std
+-- Loading package mips32
+-- Compiling entity adder
+-- Compiling architecture behavior of adder
+-- Compiling entity adder_structural
+-- Compiling architecture structural of adder_structural
+
+} {} {}} /home/robideau/cpre381/Project-B/tb_cpu3.vhd {1 {vcom -work work -2002 -explicit -vopt /home/robideau/cpre381/Project-B/tb_cpu3.vhd
+Model Technology ModelSim SE-64 vcom 6.5c Compiler 2009.08 Aug 27 2009
+-- Loading package standard
+-- Loading package std_logic_1164
+-- Loading package mips32
+-- Loading package pl_reg
+-- Compiling entity tb_cpu3
+-- Compiling architecture behavior of tb_cpu3
+-- Loading entity cpu
+
+} {} {}} /home/robideau/cpre381/Project-A-Part1/cpu_scp.vhd {1 {vcom -work work -2002 -explicit -vopt /home/robideau/cpre381/Project-A-Part1/cpu_scp.vhd
+Model Technology ModelSim SE-64 vcom 6.5c Compiler 2009.08 Aug 27 2009
+-- Loading package standard
+-- Loading package std_logic_1164
+-- Loading package std_logic_arith
+-- Loading package std_logic_unsigned
+-- Compiling architecture scp of cpu
+-- Loading package mips32
+-- Loading package pl_reg
+-- Loading entity cpu
+
+} {} {}} /home/robideau/cpre381/Project-A-Part1/inv.vhd {1 {vcom -work work -2002 -explicit -vopt /home/robideau/cpre381/Project-A-Part1/inv.vhd
+Model Technology ModelSim SE-64 vcom 6.5c Compiler 2009.08 Aug 27 2009
+-- Loading package standard
+-- Loading package std_logic_1164
+-- Compiling entity inv
+-- Compiling architecture dataflow of inv
+
+} {} {}} /home/robideau/cpre381/Project-B/pl_reg.vhd {1 {vcom -work work -2002 -explicit -vopt /home/robideau/cpre381/Project-B/pl_reg.vhd
+Model Technology ModelSim SE-64 vcom 6.5c Compiler 2009.08 Aug 27 2009
+-- Loading package standard
+-- Loading package std_logic_1164
+-- Loading package mips32
+-- Compiling package pl_reg
+-- Loading package pl_reg
+-- Compiling entity ifid_reg
+-- Compiling architecture behavior of ifid_reg
+-- Compiling entity idex_reg
+-- Compiling architecture behavior of idex_reg
+-- Compiling entity exmem_reg
+-- Compiling architecture behavior of exmem_reg
+-- Compiling entity memwb_reg
+-- Compiling architecture behavior of memwb_reg
+
+} {} {}} /home/robideau/cpre381/Project-A-Part1/decoder_5_32.vhd {1 {vcom -work work -2002 -explicit -vopt /home/robideau/cpre381/Project-A-Part1/decoder_5_32.vhd
+Model Technology ModelSim SE-64 vcom 6.5c Compiler 2009.08 Aug 27 2009
+-- Loading package standard
+-- Loading package std_logic_1164
+-- Compiling entity decoder_5_32
+-- Compiling architecture dataflow of decoder_5_32
+
+} {} {}} /home/robideau/cpre381/Project-A-Part1/tb_register_nbit.vhd {1 {vcom -work work -2002 -explicit -vopt /home/robideau/cpre381/Project-A-Part1/tb_register_nbit.vhd
+Model Technology ModelSim SE-64 vcom 6.5c Compiler 2009.08 Aug 27 2009
+-- Loading package standard
+-- Loading package std_logic_1164
+-- Compiling entity tb_register_nbit
+-- Compiling architecture behavior of tb_register_nbit
+
+} {} {}} /home/robideau/cpre381/Lab-02/full_adder_str.vhd {1 {vcom -work work -2002 -explicit -vopt /home/robideau/cpre381/Lab-02/full_adder_str.vhd
+Model Technology ModelSim SE-64 vcom 6.5c Compiler 2009.08 Aug 27 2009
+-- Loading package standard
+-- Loading package std_logic_1164
+-- Compiling entity full_adder
+-- Compiling architecture structure of full_adder
+
+} {} {}} /home/robideau/cpre381/Project-A-Part1/tb_cpu2.vhd {1 {vcom -work work -2002 -explicit -vopt /home/robideau/cpre381/Project-A-Part1/tb_cpu2.vhd
+Model Technology ModelSim SE-64 vcom 6.5c Compiler 2009.08 Aug 27 2009
+-- Loading package standard
+-- Compiling configuration config_cpu
+-- Loading package std_logic_1164
+-- Loading package mips32
+-- Loading package pl_reg
+-- Loading entity cpu
+-- Loading package std_logic_arith
+-- Loading package std_logic_unsigned
+-- Loading architecture scp of cpu
+-- Loading entity pc_reg
+-- Loading package numeric_std
+-- Loading entity adder
+-- Loading entity control
+-- Loading entity alu_ctrl
+-- Loading entity mux2to1
+-- Loading entity regfile
+-- Loading entity mux4to1
+-- Loading entity alu
+-- Loading entity pc_mux
+-- Loading entity regfile_structural
+-- Loading entity adder_structural
+-- Compiling entity tb_cpu2
+-- Compiling architecture behavior of tb_cpu2
+-- Loading entity cpu
+-- Loading configuration config_cpu
+
+} {} {}} /home/robideau/cpre381/Project-B/cpu_entity.vhd {1 {vcom -work work -2002 -explicit -vopt /home/robideau/cpre381/Project-B/cpu_entity.vhd
+Model Technology ModelSim SE-64 vcom 6.5c Compiler 2009.08 Aug 27 2009
+-- Loading package standard
+-- Loading package std_logic_1164
+-- Loading package mips32
+-- Loading package pl_reg
+-- Compiling entity cpu
+
+} {} {}}
